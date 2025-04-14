@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  vitalapp:
+    build: 
+      context: .
+      args:
+        PORT: 8080  # Puedes cambiar este valor
+    container_name: vitalapp
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"  # Usa variable de entorno o 8080 por defecto
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=${PORT:-8080}  # Para Spring Boot
+    # Volúmenes para desarrollo (opcional):
+    # volumes:
+    #   - ./src:/home/gradle/src/src
+    #   - ./build.gradle:/home/gradle/src/build.gradle
+    depends_on:
+      - postgres
+      - redis  # Si necesitas Redis
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: vitalapp-db
+    environment:
+      POSTGRES_DB: vitaldb
+      POSTGRES_USER: vitaluser
+      POSTGRES_PASSWORD: vitalpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vitaluser -d vitaldb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:  # Servicio opcional para cache
+    image: redis:6-alpine
+    container_name: vitalapp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
