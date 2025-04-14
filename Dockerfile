@@ -16,7 +16,7 @@ WORKDIR /app
 ARG JAR_FILE=VitalApp-*.jar
 
 # Copiar el JAR generado desde la fase de construcción
-COPY --from=build /home/gradle/src/build/libs/${JAR_FILE} app.jar
+COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
 
 # Puerto expuesto (definido por Render)
 EXPOSE ${PORT}
