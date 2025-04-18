@@ -1,50 +1,58 @@
 version: '3.8'
 
 services:
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    networks:
+      - vital-net
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - vital-net
+
   vitalapp:
-    build: 
-      context: .
-      args:
-        PORT: 8080  # Puedes cambiar este valor
+    image: juanjothin/vitalapp:latest
     container_name: vitalapp
     ports:
-      - "${PORT:-8080}:${PORT:-8080}"  # Usa variable de entorno o 8080 por defecto
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=${PORT:-8080}  # Para Spring Boot
-    # Volúmenes para desarrollo (opcional):
-    # volumes:
-    #   - ./src:/home/gradle/src/src
-    #   - ./build.gradle:/home/gradle/src/build.gradle
+      - "8081:8080" # Mapear puerto interno al host
     depends_on:
-      - postgres
-      - redis  # Si necesitas Redis
-
-  postgres:
-    image: postgres:13-alpine
-    container_name: vitalapp-db
+      - mongo
     environment:
-      POSTGRES_DB: vitaldb
-      POSTGRES_USER: vitaluser
-      POSTGRES_PASSWORD: vitalpass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vitaluser -d vitaldb"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/vitalappdb
+    networks:
+      - vital-net
 
-  redis:  # Servicio opcional para cache
-    image: redis:6-alpine
-    container_name: vitalapp-redis
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: DockerFile
+    container_name: jenkins
+    user: root
     ports:
-      - "6379:6379"
+      - "8082:8080"
+      - "50000:50000"
     volumes:
-      - redis_data:/data
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - vital-net
+
+networks:
+  vital-net:
+    driver: bridge
 
 volumes:
-  postgres_data:
-  redis_data:
+  mongodb_data:
+  jenkins_home:
