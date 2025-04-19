@@ -107,6 +107,7 @@ public class CitaMedicaServiceImpl implements CitaMedicaService {
                 .fechaRegistro(LocalDateTime.now())
                 .build();
 
+                
         cita.setResultado(resultado);
         cita.setEstado(EstadoCita.VISTA);
 
