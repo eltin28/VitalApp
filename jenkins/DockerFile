@@ -31,7 +31,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 RUN npm install -g newman
 
 #Agregar plugin CLI de Jenkins
-RUN jenkins-plugin-cli --plugins "workflow-aggregator git docker-workflow"
+RUN jenkins-plugin-cli --plugins "workflow-aggregator git docker-workflow" --verbose
 
 # Establecer permisos correctos
 RUN chown -R jenkins:jenkins /var/jenkins_home

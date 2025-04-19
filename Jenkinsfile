@@ -11,12 +11,13 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/eltin28/VitalApp'
+                git branch: 'Staging', url: 'https://github.com/eltin28/VitalApp'
             }
         }
 
         stage('Compilar (Gradle)') {
             steps {
+                sh 'chmod +x ./gradlew'
                 sh './gradlew clean build -x test'
             }
         }
@@ -63,10 +64,14 @@ pipeline {
 
         stage('Push a DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "$REGISTRY_CREDENTIALS", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:$DOCKER_TAG'
-                }
+                withCredentials([usernamePassword(
+                    credentialsId: "$REGISTRY_CREDENTIALS", 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                        sh 'docker push $DOCKER_IMAGE:$DOCKER_TAG'
+                    }
             }
         }
 
@@ -77,18 +82,5 @@ pipeline {
                 sh 'docker-compose up -d'
             }
         }
-
-        stage('Aprobación Manual') {
-            steps {
-                input message: "¿Continuar con el despliegue a producción?", ok: "Sí, desplegar"
-            }
-        }
-
-        stage('Desplegar a Producción') {
-            steps {
-                sh './scripts/deploy-prod.sh' // Este puede ser un bash con docker-compose o kubectl
-            }
-        }
-
     }
 }

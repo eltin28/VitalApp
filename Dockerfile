@@ -21,5 +21,5 @@ COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
 # Puerto expuesto (definido por Render)
 EXPOSE ${PORT}
 
-# Comando de ejecución
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Configuración de perfil para pruebas
+CMD ["java", "-jar", "/app/app.jar", "--spring.profiles.active=test"]
