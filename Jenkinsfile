@@ -20,7 +20,7 @@ pipeline {
             steps {
                 sh 'chmod +x ./gradlew'
                 sh "rm -rf ${env.HOME}/.gradle"
-                sh './gradlew clean --no-daemon'
+                sh './gradlew clean'
                 sh './gradlew clean build -x test'
             }
         }
