@@ -19,8 +19,8 @@ pipeline {
         stage('Compilar (Gradle)') {
             steps {
                 sh 'chmod +x ./gradlew'
-                rm -rf $HOME/.gradle
-                ./gradlew clean --no-daemon
+                sh "rm -rf ${env.HOME}/.gradle"
+                sh './gradlew clean --no-daemon'
                 sh './gradlew clean build -x test'
             }
         }
