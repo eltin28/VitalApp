@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'juanjothin/vitalapp'
         DOCKER_TAG = 'latest'
         REGISTRY_CREDENTIALS = 'Token-docker' // ID de las credenciales en Jenkins
+        SONAR_TOKEN = credentials('sonarqube-local-token') // ID en Jenkins Credentials
     }
 
     stages {
@@ -23,9 +24,6 @@ pipeline {
         }
 
         stage('Análisis SonarQube') {
-            environment {
-                SONAR_TOKEN = credentials('sonarqube-local-token') // ID en Jenkins Credentials
-            }
             steps {
                 withSonarQubeEnv('SonarQube Local') {
                     sh './gradlew sonarqube -Dsonar.login=$SONAR_TOKEN'
